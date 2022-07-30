@@ -25,6 +25,26 @@ async function main() {
   // how much we have borrowed, how much we have in collateral, how much we can borrow
   let {availableBorrowsETH, totalDebtETH} = await getBorrowUserData(lendingPool, deployer);
   const daiPrice = await getDaiPrice();
+  
+  const amountDaiToBorrow = availableBorrowsETH.toString() * 0.95 * (1 / daiPrice.toString());
+  console.log(`총 ${amountDaiToBorrow}개의 DAI를 구매할 수 있습니다.`);
+  const amountDaiToBorrowWei = ethers.utils.parseEther(amountDaiToBorrow.toString());
+  console.log(`wei로변환한 DAI총량 ${amountDaiToBorrowWei}`);
+  const daiTokenAddress = "0x6b175474e89094c44da98b954eedeac495271d0f"
+  await borrowDai(daiTokenAddress,lendingPool,amountDaiToBorrowWei,deployer);
+  await getBorrowUserData(lendingPool, deployer);
+}
+
+async function borrowDai(daiAddress,lendingPool,amountDaiToBorrowWei,account) {
+  const borrowTx = await lendingPool.borrow(
+    daiAddress,
+    amountDaiToBorrowWei,
+    1,
+    0,
+    account
+  )
+  await borrowTx.wait(1);
+  console.log("대출이 완료되었습니다.")
 }
 
 async function getDaiPrice() {
