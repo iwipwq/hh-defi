@@ -33,6 +33,15 @@ async function main() {
   const daiTokenAddress = "0x6b175474e89094c44da98b954eedeac495271d0f"
   await borrowDai(daiTokenAddress,lendingPool,amountDaiToBorrowWei,deployer);
   await getBorrowUserData(lendingPool, deployer);
+  await repay(daiTokenAddress, amountDaiToBorrowWei, lendingPool, deployer);
+  await getBorrowUserData(lendingPool, deployer);
+}
+
+async function repay(daiAddress, amount, lendingPool, account) {
+  await approveErc20(daiAddress,lendingPool.address, amount, account);
+  const repayTx = await lendingPool.repay(daiAddress,amount,1,account);
+  await repayTx.wait(1);
+  console.log("채무를 상환했습니다.");
 }
 
 async function borrowDai(daiAddress,lendingPool,amountDaiToBorrowWei,account) {
